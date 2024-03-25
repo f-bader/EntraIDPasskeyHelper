@@ -47,7 +47,7 @@ function Set-PasskeyAuthenticationMethodsPolicy {
         [Parameter()]
         [bool]$EnforceAttestation = $false,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [ValidateScript(
             { $_ | ForEach-Object { $_ -match "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" } }
         )]
@@ -69,15 +69,17 @@ function Set-PasskeyAuthenticationMethodsPolicy {
     
     process {
         # Add the AAGUIDs from the pipeline to the array list
-        $AAGUIDsAllowedFromPipeline.Add("$AAGUIDsAllowed") | Out-Null
+        $AAGUIDsAllowed | ForEach-Object {
+            $AAGUIDsAllowedFromPipeline.Add($_) | Out-Null
+        }
     }
 
     end {
 
         if ($AAGUIDsAllowedFromPipeline -ne $null) {
-            $AAGUIDsAllowed = $AAGUIDsAllowedFromPipeline
+            $TmpAAGUIDsAllowed = $AAGUIDsAllowedFromPipeline
         } else {
-            $AAGUIDsAllowed = $AAGUIDsAllowed
+            $TmpAAGUIDsAllowed = $AAGUIDsAllowed
         }
 
         $AvailablePasskeyAAGUIDs = @{
@@ -96,7 +98,7 @@ function Set-PasskeyAuthenticationMethodsPolicy {
             }
         }
 
-        foreach ( $AAGUID in $AAGUIDsAllowed ) {
+        foreach ( $AAGUID in $TmpAAGUIDsAllowed ) {
             Write-Verbose "Adding custom AAGUID $AAGUID to the allowed list"
             $SelectedAAGUIDs.Add($AAGUID) | Out-Null
         }

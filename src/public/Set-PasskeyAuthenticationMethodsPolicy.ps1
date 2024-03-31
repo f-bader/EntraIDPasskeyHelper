@@ -101,6 +101,10 @@ function Set-PasskeyAuthenticationMethodsPolicy {
             $SelectedAAGUIDs.Add($AAGUID) | Out-Null
         }
 
+        if ($EnforceAttestation -eq $false) {
+            Write-Warning "EnforceAttestation is set to $false because it's required for the public preview. Please make sure if this is the desired setting for your organization."
+        }
+
         try {
             $CurrentConfiguration = Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/policies/authenticationmethodspolicy/authenticationMethodConfigurations/Fido2" -Method Get -Verbose:$false
         } catch {

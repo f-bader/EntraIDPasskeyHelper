@@ -34,7 +34,7 @@ If you would like to configure the authentication policy method yourself, you ca
 
 ```powershell
 # Connect to Microsoft Graph
-Connect-MgGraph -Scopes "AuditLog.Read.All" -DeviceCode
+Connect-MgGraph -Scopes "AuditLog.Read.All" -DeviceCode -NoWelcome
 # Gather information about all currently registered FIDO2 security keys
 Get-PasskeyDeviceBoundAAGUID
 ```

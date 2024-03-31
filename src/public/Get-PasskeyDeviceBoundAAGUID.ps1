@@ -31,7 +31,11 @@ function Get-PasskeyDeviceBoundAAGUID {
             }
         } while (-not [string]::IsNullOrWhiteSpace($NextUri) )
     } catch {
-        throw "Failed to get current list of passkey device-bound users. Error: $_"
+        if ($_ -match "Authentication_RequestFromNonPremiumTenantOrB2CTenant") {
+            throw "The Microsoft Graph API endpoint 'reports/authenticationMethods/userRegistrationDetails' requires an Entra ID Premium P1 or P2 license. Sorry for the inconvenience."
+        } else {
+            throw "Failed to get current list of passkey device-bound users. Error: $_"
+        }
     }
 
     Write-Verbose "Found $($ReturnValue.Count) passkey device-bound users"

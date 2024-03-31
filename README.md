@@ -14,7 +14,7 @@ Since the parameter `-MicrosoftAAGUIDsAllowed` is set to All, all Microsoft AAGU
 # Connect to Microsoft Graph
 Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMethod" -DeviceCode
 # Enable the Entra ID device-bound passkey preview feature for all new Microsoft AAGUIDs while maintaining all existing AAGUIDs
-Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodPolicy -MicrosoftAAGUIDsAllowed All
+Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodsPolicy -MicrosoftAAGUIDsAllowed All
 ```
 
 ## Example #2
@@ -25,7 +25,7 @@ In this example, the Entra ID device-bound passkey preview feature is enabled, w
 # Connect to Microsoft Graph
 Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMethod" -DeviceCode
 # Enable the Entra ID device-bound passkey preview feature for Android AAGUIDs while maintaining all existing AAGUIDs
-Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodPolicy -MicrosoftAAGUIDsAllowed 'Android' -OverwriteExistingAAGUIDs
+Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodsPolicy -MicrosoftAAGUIDsAllowed 'Android' -OverwriteExistingAAGUIDs
 ```
 
 ## Example #3

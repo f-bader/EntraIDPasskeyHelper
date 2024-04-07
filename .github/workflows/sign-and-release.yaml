@@ -58,7 +58,6 @@ jobs:
 
       - name: Update PowerShell Module to PowerShell Gallery
         id: publish-to-gallery
-        if: false
         shell: pwsh
         run: |
           Publish-Module -Path ${{ github.workspace }}/EntraIDPasskeyHelper -NuGetApiKey ${{ secrets.PS_GALLERY_KEY }}

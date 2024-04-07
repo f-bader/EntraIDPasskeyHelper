@@ -12,7 +12,7 @@ Since the parameter `-MicrosoftAAGUIDsAllowed` is set to All, all Microsoft AAGU
 
 ```powershell
 # Connect to Microsoft Graph
-Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMethod" -DeviceCode
+Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMethod", "User.Read.All" -DeviceCode
 # Enable the Entra ID device-bound passkey preview feature for all new Microsoft AAGUIDs while maintaining all existing AAGUIDs
 Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodsPolicy -MicrosoftAAGUIDsAllowed All
 ```
@@ -23,7 +23,7 @@ In this example, the Entra ID device-bound passkey preview feature is enabled, w
 
 ```powershell
 # Connect to Microsoft Graph
-Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMethod" -DeviceCode
+Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMethod", "User.Read.All" -DeviceCode
 # Enable the Entra ID device-bound passkey preview feature for Android AAGUIDs while maintaining all existing AAGUIDs
 Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodsPolicy -MicrosoftAAGUIDsAllowed 'Android' -OverwriteExistingAAGUIDs
 ```
@@ -34,7 +34,14 @@ If you would like to configure the authentication policy method yourself, you ca
 
 ```powershell
 # Connect to Microsoft Graph
-Connect-MgGraph -Scopes "AuditLog.Read.All" -DeviceCode -NoWelcome
+Connect-MgGraph -Scopes "AuditLog.Read.All", "User.Read.All" -DeviceCode -NoWelcome
 # Gather information about all currently registered FIDO2 security keys
 Get-PasskeyDeviceBoundAAGUID
 ```
+
+## Known limitations
+
+If the tenant is not licensed with Entra ID P1 or P2 the Microsoft Graph endpoint 'reports/authenticationMethods/userRegistrationDetails' is not available.
+In this case all users are enumerated and check for authentication methods.
+
+This can be a very slow process if you have thousands of users.

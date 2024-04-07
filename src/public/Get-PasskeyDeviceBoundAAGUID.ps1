@@ -17,18 +17,18 @@ function Get-PasskeyDeviceBoundAAGUID {
     [CmdletBinding()]
     param ()
 
-    $ReturnValue = [System.Collections.ArrayList]::new()
+    $ReturnValue = [System.Collections.Generic.List[System.Object]]::new()
 
     Write-Verbose "Getting AAGUIDs of all passkeys that are registered in the tenant..."
 
     $NextUri = "https://graph.microsoft.com/beta/reports/authenticationMethods/userRegistrationDetails?`$filter=methodsRegistered/any(x:x eq 'passKeyDeviceBound')"
     try {
         do {
-            Write-Progress "Getting AAGUIDs of all passkeys that are registered in the tenant..." -PercentComplete -1
+            Write-Progress "Enumerating all user that have passkeys registered" -PercentComplete -1
             $Result = Invoke-MgGraphRequest -Uri $NextUri -Verbose:$false
             $NextUri = $Result['@odata.nextLink']
             $Result['value']  | ForEach-Object {
-                $ReturnValue.Add($_) | Out-Null 
+                $ReturnValue.Add($_) | Out-Null
             }
         } while (-not [string]::IsNullOrWhiteSpace($NextUri) )
     } catch {
@@ -40,14 +40,14 @@ function Get-PasskeyDeviceBoundAAGUID {
         }
     }
 
-    $NextUri = "https://graph.microsoft.com/beta/users"
+    $NextUri = "https://graph.microsoft.com/beta/users?`$filter=accountEnabled+eq+true&`$select=id&`$top=999"
     try {
         do {
-            Write-Progress "Getting AAGUIDs of all passkeys that are registered in the tenant by enumerating all users (maybe very slow)..." -PercentComplete -1
+            Write-Progress "Enumerating all users" -PercentComplete -1
             $Result = Invoke-MgGraphRequest -Uri $NextUri -Verbose:$false
             $NextUri = $Result['@odata.nextLink']
             $Result['value']  | ForEach-Object {
-                $ReturnValue.Add($_) | Out-Null 
+                $ReturnValue.Add($_)
             }
         } while (-not [string]::IsNullOrWhiteSpace($NextUri) )
     } catch {
@@ -56,14 +56,39 @@ function Get-PasskeyDeviceBoundAAGUID {
 
     Write-Verbose "Found $($ReturnValue.Count) passkey device-bound users"
 
-    $PassKeyDeviceBoundUsers = $ReturnValue |  Select-Object id, userPrincipalName
-    $PassKeyDeviceBoundAAGUIDs = [System.Collections.ArrayList]::new()
-
     try {
-        foreach ( $User in $PassKeyDeviceBoundUsers ) {
-            $CurrentMethods = Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/users/$($User.id)/authentication/fido2Methods" -Verbose:$false | Select-Object -ExpandProperty value
-            $CurrentMethods | ForEach-Object {
-                $PassKeyDeviceBoundAAGUIDs.Add($_) | Out-Null
+        $PassKeyDeviceBoundUsers = $ReturnValue |  Select-Object id
+        $PassKeyDeviceBoundAAGUIDs = [System.Collections.Generic.List[System.Object]]::new()
+
+        $MgBatchSize = 20
+        for ($i = 0; $i -lt $PassKeyDeviceBoundUsers.Count; $i += $MgBatchSize) {
+            Write-Progress "Getting AAGUIDs of all enumerated users" -PercentComplete ($i / $PassKeyDeviceBoundUsers.Count * 100)
+            $LastItem = $i + $MgBatchSize - 1
+            if ($LastItem -ge $PassKeyDeviceBoundUsers.Count) { $LastItem = $PassKeyDeviceBoundUsers.Length }
+
+            # Create a batch request for all users in the current batch
+            $id = 0
+            $Requests = $PassKeyDeviceBoundUsers[$i..($LastItem)] | ForEach-Object {
+                [PSCustomObject]@{
+                    'Id'     = ++$id
+                    'Method' = 'GET'
+                    'Url'    = "/users/$($_.id)/authentication/fido2Methods"
+                }
+            }
+
+            # Send the batch request
+            $requestParams = @{
+                'Method'      = 'Post'
+                'Uri'         = 'https://graph.microsoft.com/v1.0/$batch'
+                'ContentType' = 'application/json'
+                'Body'        = @{
+                    'requests' = @($requests)
+                } | ConvertTo-Json
+            }
+            $Result = Invoke-MgGraphRequest @requestParams
+            # Invoke-MgGraphRequest deserializes request to a hashtable
+            $Result.responses | Where-Object status -EQ 200 | Select-Object -ExpandProperty body | Select-Object -ExpandProperty value | ForEach-Object {
+                $PassKeyDeviceBoundAAGUIDs.Add([pscustomobject]$_)
             }
         }
     } catch {

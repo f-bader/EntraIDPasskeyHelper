@@ -21,7 +21,7 @@ function Get-PasskeyDeviceBoundAAGUID {
 
     Write-Verbose "Getting AAGUIDs of all passkeys that are registered in the tenant..."
 
-    $NextUri = "https://graph.microsoft.com/beta/reports/authenticationMethods/userRegistrationDetails?`$filter=methodsRegistered/any(x:x eq 'passKeyDeviceBound')"
+    $NextUri = "https://graph.microsoft.com/beta/reports/authenticationMethods/userRegistrationDetails?`$filter=methodsRegistered/any(x:x eq 'passKeyDeviceBound')&`$select=id"
     try {
         do {
             Write-Progress "Enumerating all user that have passkeys registered" -PercentComplete -1
@@ -35,23 +35,27 @@ function Get-PasskeyDeviceBoundAAGUID {
         if ($_ -match "Authentication_RequestFromNonPremiumTenantOrB2CTenant") {
             Write-Warning "The Microsoft Graph API endpoint 'reports/authenticationMethods/userRegistrationDetails' requires an Entra ID Premium P1 or P2 license."
             Write-Warning "Fallback to get a list of all users in the tenant and enumerate their FIDO2 methods instead. This may be very slow."
+            $UseFullEnumeration = $true
         } else {
             throw "Failed to get current list of passkey device-bound users. Error: $_"
         }
     }
 
-    $NextUri = "https://graph.microsoft.com/beta/users?`$filter=accountEnabled+eq+true&`$select=id&`$top=999"
-    try {
-        do {
-            Write-Progress "Enumerating all users" -PercentComplete -1
-            $Result = Invoke-MgGraphRequest -Uri $NextUri -Verbose:$false
-            $NextUri = $Result['@odata.nextLink']
-            $Result['value']  | ForEach-Object {
-                $ReturnValue.Add($_)
-            }
-        } while (-not [string]::IsNullOrWhiteSpace($NextUri) )
-    } catch {
-        throw "Failed to get current list of passkey device-bound users. Error: $_"
+    if ($UseFullEnumeration) {
+        Write-Verbose "Fallback to get a list of all users in the tenant and enumerate their FIDO2 methods instead. This may be very slow."
+        $NextUri = "https://graph.microsoft.com/beta/users?`$filter=accountEnabled+eq+true&`$select=id&`$top=999"
+        try {
+            do {
+                Write-Progress "Enumerating all users" -PercentComplete -1
+                $Result = Invoke-MgGraphRequest -Uri $NextUri -Verbose:$false
+                $NextUri = $Result['@odata.nextLink']
+                $Result['value']  | ForEach-Object {
+                    $ReturnValue.Add($_)
+                }
+            } while (-not [string]::IsNullOrWhiteSpace($NextUri) )
+        } catch {
+            throw "Failed to get current list of passkey device-bound users. Error: $_"
+        }
     }
 
     Write-Verbose "Found $($ReturnValue.Count) passkey device-bound users"

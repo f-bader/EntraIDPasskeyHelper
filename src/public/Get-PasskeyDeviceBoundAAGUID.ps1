@@ -6,6 +6,7 @@
     Get the AAGUIDs of all passkeys that are registered in the tenant.
 
 .EXAMPLE
+    # Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMethod", "User.Read.All", "UserAuthenticationMethod.Read.All"
     # Get-PasskeyDeviceBoundAAGUID
 
     This example gets the AAGUIDs of all passkeys that are registered in the tenant.

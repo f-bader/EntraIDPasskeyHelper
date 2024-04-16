@@ -34,6 +34,7 @@
     Default value is $false.
 
 .EXAMPLE
+    # Connect-MgGraph -Scopes "UserAuthenticationMethod.Read.All"
     # Set-PasskeyAuthenticationMethodsPolicy -EnforceAttestation $false -AAGUIDsAllowed "77010bd7-212a-4fc9-b236-d2ca5e9d4084" -MicrosoftAAGUIDsAllowed "All"
 
     This example sets the authentication method policy for passkeys/FIDO2 to allow all Microsoft AAGUIDs and the custom AAGUID 77010bd7-212a-4fc9-b236-d2ca5e9d4084 (Feitian BioPass FIDO2 Authenticator).

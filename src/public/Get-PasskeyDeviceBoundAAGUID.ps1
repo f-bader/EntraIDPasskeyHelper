@@ -62,7 +62,7 @@ function Get-PasskeyDeviceBoundAAGUID {
     Write-Verbose "Found $($ReturnValue.Count) passkey device-bound users"
 
     try {
-        $PassKeyDeviceBoundUsers = $ReturnValue |  Select-Object id
+        [array]$PassKeyDeviceBoundUsers = $ReturnValue |  Select-Object id
         $PassKeyDeviceBoundAAGUIDs = [System.Collections.Generic.List[System.Object]]::new()
 
         $MgBatchSize = 20

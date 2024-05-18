@@ -4,7 +4,19 @@ This module helps you to enable the Entra ID device-bound passkey preview featur
 
 The Entra ID device-bound passkey preview feature allows you to use the Entra ID device-bound passkey as an authentication method for your organization.
 
-## Example #1
+## Installation
+
+To install the module from the [PowerShell Gallery](https://www.powershellgallery.com/packages/EntraIdPasskeyHelper), you can use the following command:
+
+```powershell
+Install-Module -Name EntraIDPasskeyHelper
+```
+
+You find the module [here](https://www.powershellgallery.com/packages/EntraIdPasskeyHelper) in the PowerShell Gallery.
+
+## Usage
+
+### Example #1
 
 This example enables the Entra ID device-bound passkey preview feature for all new Microsoft AAGUIDs while maintaining all existing AAGUIDs.
 It first queries all passkey device-bound AAGUIDs already present in current tenant and then sets the authentication method policy for passkeys/FIDO2.
@@ -17,7 +29,7 @@ Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMet
 Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodsPolicy -MicrosoftAAGUIDsAllowed All
 ```
 
-## Example #2
+### Example #2
 
 In this example, the Entra ID device-bound passkey preview feature is enabled, while maintaining all existing AAGUIDs but only allowing a subset of the new Microsoft AAGUIDs.
 
@@ -28,7 +40,7 @@ Connect-MgGraph -Scopes "AuditLog.Read.All", "Policy.ReadWrite.AuthenticationMet
 Get-PasskeyDeviceBoundAAGUID | Set-PasskeyAuthenticationMethodsPolicy -MicrosoftAAGUIDsAllowed 'Android' -OverwriteExistingAAGUIDs
 ```
 
-## Example #3
+### Example #3
 
 If you would like to configure the authentication policy method yourself, you can use the following example to gather information about all currently registered FIDO2 security keys.
 

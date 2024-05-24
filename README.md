@@ -12,7 +12,9 @@ To install the module from the [PowerShell Gallery](https://www.powershellgaller
 Install-Module -Name EntraIDPasskeyHelper
 ```
 
-You find the module [here](https://www.powershellgallery.com/packages/EntraIdPasskeyHelper) in the PowerShell Gallery.
+You find the module in the [PowerShell Gallery](https://www.powershellgallery.com/packages/EntraIdPasskeyHelper).
+
+[![PSGallery Version](https://img.shields.io/powershellgallery/v/EntraIDPasskeyHelper.svg?style=flat&logo=powershell&label=PSGallery%20Version)](https://www.powershellgallery.com/packages/EntraIDPasskeyHelper) [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/EntraIDPasskeyHelper.svg?style=flat&logo=powershell&label=PSGallery%20Downloads)](https://www.powershellgallery.com/packages/EntraIDPasskeyHelper)
 
 ## Usage
 

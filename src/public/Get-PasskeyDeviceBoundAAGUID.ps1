@@ -62,7 +62,11 @@ function Get-PasskeyDeviceBoundAAGUID {
     Write-Verbose "Found $($ReturnValue.Count) passkey device-bound users"
 
     try {
-        [array]$PassKeyDeviceBoundUsers = $ReturnValue |  Select-Object id
+        if ($PSVersionTable.PSEdition -eq "Core") {
+            [array]$PassKeyDeviceBoundUsers = $ReturnValue |  Select-Object -ExpandProperty id
+        } else {
+            [array]$PassKeyDeviceBoundUsers = $ReturnValue | ForEach-Object { $_.id }
+        }
         $PassKeyDeviceBoundAAGUIDs = [System.Collections.Generic.List[System.Object]]::new()
 
         $MgBatchSize = 20
@@ -77,7 +81,7 @@ function Get-PasskeyDeviceBoundAAGUID {
                 [PSCustomObject]@{
                     'Id'     = ++$id
                     'Method' = 'GET'
-                    'Url'    = "/users/$($_.id)/authentication/fido2Methods"
+                    'Url'    = "/users/$($_)/authentication/fido2Methods"
                 }
             }
 
@@ -92,8 +96,14 @@ function Get-PasskeyDeviceBoundAAGUID {
             }
             $Result = Invoke-MgGraphRequest @requestParams
             # Invoke-MgGraphRequest deserializes request to a hashtable
-            $Result.responses | Where-Object status -EQ 200 | Select-Object -ExpandProperty body | Select-Object -ExpandProperty value | ForEach-Object {
-                $PassKeyDeviceBoundAAGUIDs.Add([pscustomobject]$_)
+            if ($PSVersionTable.PSEdition -eq "Core") {
+                $Result.responses | Where-Object status -EQ 200 | Select-Object -ExpandProperty body | Select-Object -ExpandProperty value | ForEach-Object {
+                    $PassKeyDeviceBoundAAGUIDs.Add([pscustomobject]$_)
+                }
+            } else {
+                $Result.responses | Where-Object status -EQ 200 | ForEach-Object { $_.body.value } | ForEach-Object {
+                    $PassKeyDeviceBoundAAGUIDs.Add([pscustomobject]$_)
+                }
             }
         }
     } catch {
